@@ -126,6 +126,11 @@ function deletePlayer(id) {
 }
 
 function editPlayer(id) {
+    if ($(`#editButtonImg${id}`).attr('src') === "/rpg/img/save.png") {
+        saveEditing(id);
+        return;
+    }
+
     let saveUrl = "/rpg/img/save.png";
     $(`#editButtonImg${id}`).attr('src', saveUrl);
     $(`#button_delete_${id}`).hide();
@@ -178,6 +183,34 @@ function editPlayer(id) {
     });
     selectBanHTML += `</select>`;
     td_banned.innerHTML = selectBanHTML;
+}
+
+function saveEditing(id) {
+    let playerUrl = "/rpg/rest/players/" + id;
+    let playerValues = $(`#tr_id_${id}`).children();
+
+    let tdName =  $(playerValues[1]).find("input").val();
+    let tdTitle =  $(playerValues[2]).find("input").val();
+    let tdRace =  $(playerValues[3]).find("select").val();
+    let tdProfession =  $(playerValues[4]).find("select").val();
+    let tdBanned =  $(playerValues[7]).find("select").val();
+    
+    $.ajax({
+    url: playerUrl,
+    type: "POST",
+    dataType: 'json',
+    contentType: 'application/json;charset=UTF-8',
+    async: false,
+    data: JSON.stringify({"name": tdName, "title": tdTitle, "race": tdRace, "profession": tdProfession, "banned": tdBanned}),
+    success: function() {
+        getPlayersList(pageNumber);
+        console.log('saving was successful');
+    },
+    error: function(xhr, status, error) {
+        getPlayersList(pageNumber);
+    console.error("failure during save:", error);
+    }
+    })
 }
 </script>
 </body>
