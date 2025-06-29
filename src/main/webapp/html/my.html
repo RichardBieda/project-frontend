@@ -50,18 +50,13 @@
     }
 
     playersUrl = playersUrl.concat("pageSize=").concat(countPerPage);
-
-    /* if (pageNumber == null) {
-         pageNumber = 0;
-    } */
-
     playersUrl = playersUrl.concat("&pageNumber=").concat(pageNumber);
         
          $.get(playersUrl, function(response) {
             $.each(response, function(i, data) {
                 const bgColor = i % 2 == 1 ? ' style="background-color: #ddeeff;"' : '';
                 const player = `
-                    <tr${bgColor}>
+                    <tr${bgColor} id='tr_id_${data.id}'>
                         <td>${data.id}</td>
                         <td>${data.name}</td>
                         <td>${data.title}</td>
@@ -134,7 +129,55 @@ function editPlayer(id) {
     let saveUrl = "/rpg/img/save.png";
     $(`#editButtonImg${id}`).attr('src', saveUrl);
     $(`#button_delete_${id}`).hide();
+
+    let children = $(`#tr_id_${id}`).children();
+
+    //editing name
+    let td_name = children[1];
+    td_name.innerHTML = `<input type='text' id='td_name_${id}' value="${td_name.innerHTML}" />`;
+
+    //editing title
+    let td_title = children[2];
+    td_title.innerHTML = `<input type='text' id='td_title_${id}' value="${td_title.innerHTML}" />`;
+
+    //editing race
+    let td_race = children[3];
+    const RACE_OPTIONS = ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'];
+    let currentRaceValue = td_race.innerHTML;
+
+    let selectRaceHTML =  `<select id="td_race_${id}">`;
+    RACE_OPTIONS.forEach(option => {
+    const selectRace = (option === currentRaceValue.trim()) ? 'selected' : '';
+    selectRaceHTML += `<option value="${option}" ${selectRace}>${option}</option>`;
+    });
+    selectRaceHTML += `</select>`;
+    td_race.innerHTML = selectRaceHTML;
+   
+    //editing profession
+    let td_profession = children[4];
+    const PROFESSION_OPTIONS = ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'];
+    let currentProValue = td_profession.innerHTML;
+
+    let selectProHTML =  `<select id="td_pro_${id}">`;
+    PROFESSION_OPTIONS.forEach(option => {
+    const selectPro = (option === currentProValue.trim()) ? 'selected' : '';
+    selectProHTML += `<option value="${option}" ${selectPro}>${option}</option>`;
+    });
+    selectProHTML += `</select>`;
+    td_profession.innerHTML = selectProHTML;
     
+    //editing banned
+    let td_banned = children[7];
+    const BANNED_OPTIONS = ['true', 'false'];
+    let currentBanValue = td_banned.innerHTML;
+
+    let selectBanHTML =  `<select id="td_ban_${id}">`;
+    BANNED_OPTIONS.forEach(option => {
+    const selectBan = (option === currentBanValue.trim()) ? 'selected' : '';
+    selectBanHTML += `<option value="${option}" ${selectBan}>${option}</option>`;
+    });
+    selectBanHTML += `</select>`;
+    td_banned.innerHTML = selectBanHTML;
 }
 </script>
 </body>
