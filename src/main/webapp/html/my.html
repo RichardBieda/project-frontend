@@ -2,11 +2,140 @@
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
+    <link href="/rpg/css/my.css" rel="stylesheet">
 </head>
-<body>
+<body onload="getPlayersList(0)">
 <h1>RPG admin panel</h1>
+
 <h2>Accounts list:</h2>
 
+<label for="count_1">Players per page</label>
+<select id="count_1" onchange="getPlayersList(0)">
+    <option value="3">3</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+</select>
+
+<table id="table1">
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+</table>
+
+<div id="pages">Page:</div>
+
+<script>
+    let pageNumber = 0;
+
+    function getPlayersList(pageNumber) {
+        $("tr:has(td)").remove();
+
+    let playersUrl = "/rpg/rest/players?";
+
+    let countPerPage = $("#count_1").val();
+
+    if (countPerPage == null) {
+           countPerPage = 3;
+    }
+
+    playersUrl = playersUrl.concat("pageSize=").concat(countPerPage);
+
+    /* if (pageNumber == null) {
+         pageNumber = 0;
+    } */
+
+    playersUrl = playersUrl.concat("&pageNumber=").concat(pageNumber);
+        
+         $.get(playersUrl, function(response) {
+            $.each(response, function(i, data) {
+                const bgColor = i % 2 == 1 ? ' style="background-color: #ddeeff;"' : '';
+                const player = `
+                    <tr${bgColor}>
+                        <td>${data.id}</td>
+                        <td>${data.name}</td>
+                        <td>${data.title}</td>
+                        <td>${data.race}</td>
+                        <td>${data.profession}</td>
+                        <td>${data.level}</td>
+                        <td>${new Date(data.birthday).toLocaleDateString()}</td>
+                        <td>${data.banned}</td>
+                        <td><button id='edit_button_${data.id}' onclick='editPlayer(${data.id})'>
+                        <img id='editButtonImg${data.id}' src='/rpg/img/edit.png'>
+                        </button></td>
+                        <td><button id='button_delete_${data.id}' onclick='deletePlayer(${data.id})'>
+                        <img src='/rpg/img/delete.png'>
+                        </button></td>
+                    </tr>`;
+                $("#table1").append(player);
+            });
+        });
+
+        let tc = getTotalCount();
+        let pagesCount = Math.ceil(tc / countPerPage);
+
+        $('button.pgn-btn-styled').remove();
+
+        for (let i = 0; i < pagesCount; i++) {
+            let buttonTag = "<button>" + (i + 1) + "</button>";
+            let btn = $(buttonTag)
+            .attr('id', "paging_button_" + i)
+            .attr('onclick', "getPlayersList(" + i + ")")
+            .addClass('pgn-btn-styled')
+            $('#pages').append(btn);
+        }
+
+        let identifier = "#paging_button_" + pageNumber;
+        $(identifier).css("color", "red").css("font-weight", "bold");
+    }
+ 
+
+function getTotalCount() {
+    const playersCountUrl = "/rpg/rest/players/count";
+        let result = 0;
+        $.ajax({
+            type: 'GET',
+            url: playersCountUrl,
+            async: false,
+            success: function(data) {
+            result = parseInt(data);
+            }
+        })
+        return result;
+}
+
+function deletePlayer(id) {
+    let playerUrl = "/rpg/rest/players/" + id;
+    console.log(playerUrl);
+    $.ajax({
+        url: playerUrl,
+        async: false,
+        method: 'DELETE',
+        success: function() {
+            console.log(id + ": is deletet");
+            console.log("total players count: " + getTotalCount());
+            getPlayersList(pageNumber);
+
+        }
+    })
+}
+
+function editPlayer(id) {
+    let saveUrl = "/rpg/img/save.png";
+    $(`#editButtonImg${id}`).attr('src', saveUrl);
+    $(`#button_delete_${id}`).hide();
+    
+}
+</script>
 </body>
 </html>
