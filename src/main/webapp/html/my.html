@@ -34,9 +34,93 @@
 </table>
 
 <div id="pages">Page:</div>
+<Br>
+
+<h2>Create new player</h2>
+
+<label for="new_name">Name</label>
+<input id="new_name" type="text" maxlength="12">
+<br>
+
+<label for="new_title">Title</label>
+<input id="new_title" type="text" maxlength="30">
+<br>
+
+<label for="new_race">Race</label>
+<select id="new_race">
+    <option value="HUMAN">Human</option>
+    <option value="DWARF">Dwarf</option>
+    <option value="ELF">Elf</option>
+    <option value="GIANT">Giant</option>
+    <option value="ORC">Orc</option>
+    <option value="TROLL">Troll</option>
+    <option value="HOBBIT">Hobbit</option>
+</select>
+<br>
+
+<label for="new_profession">Profession</label>
+<select id="new_profession">
+    <option value="WARRIOR">Warrior</option>
+    <option value="ROGUE">Rogue</option>
+    <option value="SORCERER">sorcerer</option>
+    <option value="CLERIC">Cleric</option>
+    <option value="PALADIN">Paladin</option>
+    <option value="NAZGUL">Nazgul</option>
+    <option value="WARLOCK">Warlock</option>
+    <option value="DRUID">Druid</option>
+</select>
+<br>
+
+<label for="new_level">Level</label>
+<input id="new_level" type="number" min="0" max="100">
+<br>
+
+<label for="new_birthday">Birthday</label>
+<input id="new_birthday" type="date" min="2000-01-01" max="3000-12-31">
+<br>
+
+<label for="new_banned">Banned</label>
+<select id="new_banned">
+    <option value="false">false</option>
+    <option value="true">true</option>
+</select>
+<br><br>
+
+<button id="save_button" onclick="savePlayer()">create</button>
 
 <script>
     let pageNumber = 0;
+
+    function savePlayer() {
+
+        let newName = $('#new_name').val();
+        let newTitle = $('#new_title').val();
+        let newRace = $('#new_race').val();
+        let newProfession = $('#new_profession').val();
+        let newLevel = $('#new_level').val();
+        let newBirthday = $('#new_birthday').val();
+        let newBanned = $('#new_banned').val();
+
+        let saveUrl = "/rpg/rest/players";
+
+        $.ajax({
+        url: saveUrl,
+        type: "POST",
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        async: false,
+        data: JSON.stringify({"name": newName, "title": newTitle, "race": newRace, "profession": newProfession, "level": newLevel, "birthday": new Date(newBirthday).getTime(), "banned": newBanned}),
+        success: function() {
+            getPlayersList(pageNumber);
+            console.log('creating was successful');
+        },
+        error: function(xhr, status, error) {
+            getPlayersList(pageNumber);
+            console.error("failure during creating:", error);
+        }
+        });
+    }
+
 
     function getPlayersList(pageNumber) {
         $("tr:has(td)").remove();
@@ -109,6 +193,7 @@ function getTotalCount() {
         return result;
 }
 
+
 function deletePlayer(id) {
     let playerUrl = "/rpg/rest/players/" + id;
     console.log(playerUrl);
@@ -124,6 +209,7 @@ function deletePlayer(id) {
         }
     })
 }
+
 
 function editPlayer(id) {
     if ($(`#editButtonImg${id}`).attr('src') === "/rpg/img/save.png") {
@@ -185,6 +271,7 @@ function editPlayer(id) {
     td_banned.innerHTML = selectBanHTML;
 }
 
+
 function saveEditing(id) {
     let playerUrl = "/rpg/rest/players/" + id;
     let playerValues = $(`#tr_id_${id}`).children();
@@ -210,7 +297,7 @@ function saveEditing(id) {
         getPlayersList(pageNumber);
     console.error("failure during save:", error);
     }
-    })
+    });
 }
 </script>
 </body>
